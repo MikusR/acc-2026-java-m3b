@@ -245,7 +245,12 @@ public class ConsoleMenu {
     private int readInt() {
         while (true) {
             try {
-                return Integer.parseInt(scanner.nextLine());
+                int number = Integer.parseInt(scanner.nextLine());
+                if (number < 0) {
+                    System.out.print("Invalid input. Number cannot be negative. Try again: ");
+                    continue;
+                }
+                return number;
             } catch (NumberFormatException e) {
                 System.out.print("Invalid input. Please enter a valid number: ");
             }
@@ -254,8 +259,12 @@ public class ConsoleMenu {
 
     private double readDouble() {
         while (true) {
-            try {
-                return Double.parseDouble(scanner.nextLine());
+            try {Double number = Double.parseDouble(scanner.nextLine());
+                if (number < 0) {
+                    System.out.print("Invalid input. Number cannot be negative. Try again: ");
+                    continue;
+                }
+                return number;
             } catch (NumberFormatException e) {
                 System.out.print("Invalid input. Please enter a valid number: ");
             }
