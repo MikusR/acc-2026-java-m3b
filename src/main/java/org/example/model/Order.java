@@ -1,5 +1,7 @@
 package org.example.model;
 
+import org.example.config.AppConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ public class Order {
     private final List<OrderItem> items;
     private OrderStatus status;
     private Discount discount = new NoDiscount();
+    private final AppConfig config = AppConfig.getInstance();
 
     public Order(Builder builder) {
         this.customerName = builder.customerName;
@@ -16,17 +19,37 @@ public class Order {
     }
 
     public void addItem(OrderItem item){
-        // TODO: prevent adding items if order is already paid
+        if (this.status == OrderStatus.PAID) {
+            throw new IllegalStateException("Cannot add items to an order that's been paid");
+        }
         items.add(item);
     }
-
+    public double calculateSubtotal(){
+        double subtotal = 0;
+        for (OrderItem item : items) {
+            subtotal += item.calculateTotal();
+        }
+        return subtotal;
+    }
+    public double calculateDiscountedSubtotal(){
+        double subtotal = calculateSubtotal();
+        return discount.apply(subtotal);
+    }
     public double calculateTotal(){
-        // TODO: calculate total from all order items (including discounts)
-        return 0;
+        return calculateDiscountedSubtotal() + calculateTax();
     }
 
+    public double calculateTax() {
+        double discountedSubtotal = calculateDiscountedSubtotal();
+        double taxRate = config.getTaxRate();
+        return discountedSubtotal * taxRate;
+    }
+
+
     public void markAsPaid(){
-        // TODO: validate order is not empty
+        if (items.isEmpty()) {
+            throw new IllegalStateException("Cannot mark an empty order as paid");
+        }
         this.status = OrderStatus.PAID;
     }
 
@@ -62,8 +85,18 @@ public class Order {
             return this;
         }
         public Order build(){
-            // TODO: validate customerName
+            if (customerName == null || customerName.trim().isEmpty()) {
+                throw new IllegalArgumentException("Customer name cannot be empty");
+            }
             return new Order(this);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Order | Customer: " + customerName +
+                " | Items: " + items.size() +
+                " | Total: $" + calculateTotal() +
+                " | Status: " + status;
     }
 }
