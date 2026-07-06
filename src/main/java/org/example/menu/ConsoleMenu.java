@@ -4,6 +4,8 @@ import org.example.config.AppConfig;
 import org.example.model.Order;
 import org.example.model.OrderItem;
 import org.example.model.PaymentResult;
+import org.example.model.PercentageDiscount;
+import org.example.model.FixedAmountDiscount;
 import org.example.payment.PaymentMethod;
 import org.example.payment.PaymentMethodFactory;
 import org.example.payment.PaymentProcessor;
@@ -34,6 +36,7 @@ public class ConsoleMenu {
                 case 3 -> viewOrder();
                 case 4 -> payOrder();
                 case 5 -> viewCompletedOrders();
+                case 6 -> applyDiscount();
                 case 0 -> running = false;
                 default -> running = true;
             }
@@ -44,6 +47,53 @@ public class ConsoleMenu {
         System.out.println("Completed Orders:");
         for (Order order : completedOrders) {
             System.out.println(order);
+        }
+    }
+
+    private void applyDiscount() {
+        if (currentOrder == null) {
+            System.out.println("Please create an order first.");
+            return;
+        }
+
+        if (currentOrder.isPaid()) {
+            System.out.println("Cannot apply discount to an order that has already been paid.");
+            return;
+        }
+
+        System.out.println("""
+                Select discount type:
+                1. Percentage Discount
+                2. Fixed Amount Discount
+                """);
+        int option = readInt();
+
+        switch (option) {
+            case 1 -> {
+                System.out.println("Discount code:");
+                String code = readString("Discount code");
+                System.out.println("Percentage:");
+                double percentage = readDouble();
+                if (percentage < 0 || percentage > 100) {
+                    System.out.println("Invalid percentage. Must be between 0 and 100.");
+                    return;
+                }
+                currentOrder.applyDiscount(new PercentageDiscount(code, percentage));
+                System.out.println("Percentage discount applied successfully.");
+            }
+            case 2 -> {
+                System.out.println("Discount code:");
+                String code = readString("Discount code");
+                System.out.println("Amount:");
+                double amount = readDouble();
+                if (amount < 0) {
+                    System.out.println("Invalid amount. Must be positive.");
+                    return;
+                }
+                currentOrder.applyDiscount(new FixedAmountDiscount(code, amount));
+                System.out.println("Fixed amount discount applied successfully.");
+            }
+            default -> System.out.println("Invalid discount type selection.");
         }
     }
 
@@ -219,6 +269,7 @@ public class ConsoleMenu {
                 3. View order
                 4. Pay order
                 5. View completed orders
+                6. Apply discount
                 0. Exit
                 """);
     }
