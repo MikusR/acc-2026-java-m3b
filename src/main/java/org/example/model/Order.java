@@ -10,7 +10,7 @@ public class Order {
     private final List<OrderItem> items;
     private OrderStatus status;
     private Discount discount = new NoDiscount();
-    AppConfig config = AppConfig.getInstance();
+    private final AppConfig config = AppConfig.getInstance();
 
     public Order(Builder builder) {
         this.customerName = builder.customerName;

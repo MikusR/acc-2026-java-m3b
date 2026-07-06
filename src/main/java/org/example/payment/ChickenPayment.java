@@ -4,7 +4,7 @@ import org.example.config.AppConfig;
 import org.example.model.PaymentResult;
 
 public class ChickenPayment extends PaymentMethod {
-    AppConfig config = AppConfig.getInstance();
+    private final AppConfig config = AppConfig.getInstance();
     private final int chickenCount;
 
     public ChickenPayment(int count) {
